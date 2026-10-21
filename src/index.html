@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Listing Hub</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --panel-2:#1e222b; --line:#2a2f3a;
+    --text:#e7e9ee; --muted:#9aa2b1; --accent:#5b9dff; --accent-soft:#1d3557;
+    --good:#3ecf8e; --radius:12px;
+  }
+  @media (prefers-color-scheme: light){
+    :root{ --bg:#f6f7f9; --panel:#fff; --panel-2:#f0f2f5; --line:#e2e5ea;
+           --text:#161a20; --muted:#69707d; --accent-soft:#e6efff; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  a{color:inherit;text-decoration:none}
+
+  header{position:sticky;top:0;z-index:10;background:var(--panel);
+         border-bottom:1px solid var(--line);padding:14px 20px}
+  .bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;max-width:1400px;margin:0 auto}
+  .brand{font-weight:700;font-size:17px;letter-spacing:-.2px;margin-right:4px}
+  .brand span{color:var(--accent)}
+  input,select{background:var(--panel-2);color:var(--text);border:1px solid var(--line);
+               border-radius:8px;padding:8px 10px;font:inherit;font-size:14px}
+  input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
+  #q{flex:1;min-width:200px}
+  .price-range{display:flex;gap:6px;align-items:center}
+  .price-range input{width:82px}
+  .meta{max-width:1400px;margin:0 auto;padding:12px 20px 0;color:var(--muted);font-size:13px;
+        display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+  main{max-width:1400px;margin:0 auto;padding:16px 20px 60px}
+  .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(270px,1fr))}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+        overflow:hidden;display:flex;flex-direction:column;transition:transform .12s,border-color .12s}
+  .card:hover{transform:translateY(-2px);border-color:var(--accent)}
+  .thumb{height:132px;background:var(--panel-2);display:flex;align-items:center;justify-content:center;
+         overflow:hidden;position:relative}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+  .thumb .ph{color:var(--muted);font-size:26px}
+  .src{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.65);color:#fff;
+       font-size:11px;font-weight:600;padding:3px 7px;border-radius:5px;text-transform:uppercase;
+       letter-spacing:.4px}
+  .body{padding:12px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .toprow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .src-inline{background:var(--panel-2);border:1px solid var(--line);color:var(--muted);
+              font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;
+              text-transform:uppercase;letter-spacing:.4px}
+  .title{font-size:14px;font-weight:600;line-height:1.35;display:-webkit-box;
+         -webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .price{font-size:18px;font-weight:700;color:var(--accent)}
+  .price small{font-size:12px;font-weight:600;color:var(--muted);margin-left:3px}
+  .seller{font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .rate{color:var(--good);font-weight:600}
+  .foot{margin-top:auto;padding-top:8px;border-top:1px solid var(--line);
+        display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted)}
+  .go{color:var(--accent);font-weight:600}
+  .cat{display:inline-block;background:var(--accent-soft);color:var(--accent);
+       font-size:11px;padding:2px 7px;border-radius:99px;font-weight:600}
+
+  .state{padding:60px 20px;text-align:center;color:var(--muted)}
+  .state code{background:var(--panel-2);padding:2px 6px;border-radius:4px;color:var(--text)}
+  .more{display:block;margin:24px auto 0;padding:11px 26px;background:var(--accent);color:#fff;
+        border:0;border-radius:8px;font:inherit;font-weight:600;cursor:pointer}
+  .more:disabled{opacity:.5;cursor:default}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="brand">Listing<span>Hub</span></div>
+    <input id="q" type="search" placeholder="Search titles and sellers...">
+    <select id="source"><option value="all">All sources</option></select>
+    <select id="category"><option value="all">All categories</option></select>
+    <div class="price-range">
+      <input id="min_price" type="number" placeholder="min" min="0">
+      <span style="color:var(--muted)">–</span>
+      <input id="max_price" type="number" placeholder="max" min="0">
+    </div>
+    <select id="sort">
+      <option value="newest">Newest first</option>
+      <option value="price_asc">Price: low to high</option>
+      <option value="price_desc">Price: high to low</option>
+      <option value="title">Title A–Z</option>
+      <option value="oldest">Oldest first</option>
+    </select>
+  </div>
+  <div class="meta">
+    <span id="count">Loading...</span>
+    <span id="freshness"></span>
+  </div>
+</header>
+
+<main>
+  <div id="grid" class="grid"></div>
+  <div id="state" class="state"></div>
+  <button id="more" class="more" hidden>Load more</button>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const PAGE = 60;
+let offset = 0, total = 0, loading = false;
+
+const state = {
+  q:'', source:'all', category:'all', min_price:'', max_price:'', sort:'newest'
+};
+
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function money(price, currency){
+  if (price === null || price === undefined) return '&mdash;';
+  const n = Number(price);
+  const s = n >= 1000 ? n.toLocaleString(undefined,{maximumFractionDigits:0})
+                      : n.toFixed(2);
+  return `${s}<small>${esc(currency || '')}</small>`;
+}
+
+function ago(ms){
+  if (!ms) return '';
+  const secs = (Date.now() - Number(ms)) / 1000;
+  if (secs < 3600)  return Math.max(1, Math.round(secs/60)) + 'm ago';
+  if (secs < 86400) return Math.round(secs/3600) + 'h ago';
+  const d = Math.round(secs/86400);
+  if (d < 30)  return d + 'd ago';
+  if (d < 365) return Math.round(d/30) + 'mo ago';
+  return Math.round(d/365) + 'y ago';
+}
+
+function card(item){
+  // Only listings that actually ship an image get a thumbnail; the rest render
+  // as compact text cards rather than a wall of empty grey boxes.
+  const thumb = item.image_url
+    ? `<div class="thumb">
+         <img src="${esc(item.image_url)}" alt="" loading="lazy"
+              onerror="this.closest('.thumb').remove()">
+         <span class="src">${esc(item.source)}</span>
+       </div>`
+    : '';
+
+  const rating = (item.seller_rating != null)
+    ? `<span class="rate">${(item.seller_rating*100).toFixed(1)}%</span>` : '';
+  const orders = item.seller_orders
+    ? `<span>${Number(item.seller_orders).toLocaleString()} sold</span>` : '';
+
+  return `
+  <a class="card" href="${esc(item.url)}" target="_blank" rel="noopener noreferrer">
+    ${thumb}
+    <div class="body">
+      <div class="toprow">
+        ${thumb ? '' : `<span class="src-inline">${esc(item.source)}</span>`}
+        <span class="cat">${esc(item.category_label || item.category)}</span>
+      </div>
+      <div class="title">${esc(item.title)}</div>
+      <div class="price">${money(item.price, item.currency)}</div>
+      <div class="seller">
+        <span>${esc(item.seller || 'Unknown seller')}</span>
+        ${rating}${orders}
+      </div>
+      <div class="foot">
+        <span>${esc(ago(item.posted_at || item.first_seen))}</span>
+        <span class="go">View on ${esc(item.source)} &rarr;</span>
+      </div>
+    </div>
+  </a>`;
+}
+
+function queryString(){
+  const p = new URLSearchParams();
+  for (const [k,v] of Object.entries(state)) if (v !== '' && v !== 'all') p.set(k,v);
+  p.set('limit', PAGE); p.set('offset', offset);
+  return p.toString();
+}
+
+async function load(reset){
+  if (loading) return;
+  loading = true;
+  if (reset){ offset = 0; $('#grid').innerHTML = ''; }
+  $('#more').disabled = true;
+
+  try {
+    const res  = await fetch('/api/listings?' + queryString());
+    const data = await res.json();
+    total = data.total;
+
+    $('#grid').insertAdjacentHTML('beforeend', data.listings.map(card).join(''));
+    offset += data.listings.length;
+
+    $('#count').textContent = total
+      ? `${total.toLocaleString()} listing${total===1?'':'s'} — showing ${offset.toLocaleString()}`
+      : 'No listings match those filters';
+    $('#state').innerHTML = total ? '' :
+      'Nothing here. Try clearing the filters, or run <code>python scrape.py</code> to pull more.';
+    $('#more').hidden = offset >= total;
+  } catch (err) {
+    $('#state').textContent = 'Could not reach the local server: ' + err.message;
+  } finally {
+    loading = false;
+    $('#more').disabled = false;
+  }
+}
+
+async function loadFacets(){
+  try{
+    const f = await (await fetch('/api/facets')).json();
+    for (const s of f.sources)
+      $('#source').insertAdjacentHTML('beforeend',
+        `<option value="${esc(s.source)}">${esc(s.source)} (${s.c})</option>`);
+    for (const c of f.categories)
+      $('#category').insertAdjacentHTML('beforeend',
+        `<option value="${esc(c.category)}">${esc(c.label)} (${c.c})</option>`);
+    $('#freshness').textContent = f.last_scrape ? 'Last updated ' + ago(f.last_scrape) : '';
+  } catch(e){ /* facets are optional */ }
+}
+
+let timer;
+$('#q').addEventListener('input', e => {
+  clearTimeout(timer);
+  timer = setTimeout(() => { state.q = e.target.value; load(true); }, 250);
+});
+for (const id of ['source','category','sort','min_price','max_price']){
+  $('#'+id).addEventListener('change', e => { state[id] = e.target.value; load(true); });
+}
+$('#more').addEventListener('click', () => load(false));
+
+loadFacets();
+load(true);
+</script>
+</body>
+</html>

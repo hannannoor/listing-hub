@@ -1,0 +1,30 @@
+# Local organisation records and credentials
+_local-records/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Reinstallable dependencies and generated caches
+node_modules/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.dart_tool/
+.gradle/
+build/
+dist/
+.next/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# Local editor/OS/runtime files
+.DS_Store
+Thumbs.db
+*.log
+*.db-journal
+*.db-wal
+*.db-shm
+~$*

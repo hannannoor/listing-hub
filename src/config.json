@@ -1,0 +1,19 @@
+{
+  "_comment": "categories = what to scrape. filters = defaults for find.py (override with flags).",
+  "region": "sg",
+  "pages_per_category": 3,
+  "sort": "most_recent",
+  "delay_seconds": 1.5,
+  "categories": [
+    {
+      "source": "g2g",
+      "slug": "mobile-legends-account",
+      "label": "ML Accounts"
+    }
+  ],
+  "filters": {
+    "max_price": 30,
+    "limit": 15,
+    "sort": "price_asc"
+  }
+}
